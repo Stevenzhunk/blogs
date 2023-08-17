@@ -21,3 +21,6 @@ Content-Type: application/json
   "url": "www.deadspace.com",
   "likes": 7788956
 }
+
+################################
+GET http://localhost:3003/api/blogs/64c47d5ac8771ed399a44d1c

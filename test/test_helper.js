@@ -1,6 +1,6 @@
 const Blogs = require('../models/blogs');
 
-const initialBlogs = [
+const initialBlog = [
   {
     title: 'Dead Space',
     author: 'EA games',
@@ -15,12 +15,21 @@ const initialBlogs = [
   },
 ];
 
+const nonExistingId = async () => {
+  const blog = new Blogs({ content: 'willremovethissoon', date: new Date() });
+  await blog.save();
+  await blog.remove();
+
+  return blog._id.toString();
+};
+
 const blogsInDb = async () => {
   const blogs = await Blogs.find({});
   return blogs.map((blog) => blog.toJSON());
 };
 
-module.export = {
-  initialBlogs,
+module.exports = {
+  initialBlog,
   blogsInDb,
+  nonExistingId,
 };

@@ -3,29 +3,15 @@ const supertest = require('supertest');
 const app = require('../app');
 const api = supertest(app);
 const helper = require('./test_helper');
-const blogs = require('../models/blogs');
-
-const initialBlogs = [
-  {
-    title: 'Dead Space',
-    author: 'EA games',
-    url: 'www.deadspace.com',
-    likes: 7788956,
-  },
-  {
-    title: 'Half Life',
-    author: 'Valve Corporation',
-    url: 'www.steam.com',
-    likes: 77889561414,
-  },
-];
+const Blogs = require('../models/blogs');
 
 beforeEach(async () => {
-  await blogs.deleteMany({});
-  let blogObject = new blogs(initialBlogs[0]);
-  await blogObject.save();
-  blogObject = new blogs(initialBlogs[1]);
-  await blogObject.save();
+  await Blogs.deleteMany({});
+
+  for (let blog of helper.initialBlog) {
+    let noteObject = new Blogs(blog);
+    await noteObject.save();
+  }
 });
 
 describe('when blogs are created', () => {
@@ -50,7 +36,7 @@ describe('when blogs are created', () => {
   test('getting correct number of blogs', async () => {
     const res = await api.get('/api/blogs');
 
-    expect(res.body).toHaveLength(initialBlogs.length);
+    expect(res.body).toHaveLength(helper.initialBlog.length);
   });
 });
 describe('then blogs can be', () => {
@@ -67,15 +53,18 @@ describe('then blogs can be', () => {
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/);
-    const res = await api.get('/api/blogs');
-    const titles = res.body.map((r) => r.title);
-    expect(res.body).toHaveLength(initialBlogs.length + 1);
+
+    const blogsAtEnd = await helper.blogsInDb(); // Corrección: Llama a blogsInDb como función
+    expect(blogsAtEnd).toHaveLength(helper.initialBlog.length + 1);
+
+    const titles = blogsAtEnd.map((r) => r.title);
     expect(titles).toContain('test async');
   });
-  test('a specific blog is within the returned blogs', async () => {
-    const res = await api.get('/api/blogs');
 
-    const authors = res.body.map((r) => r.author);
+  test('a specific blog is within the returned blogs', async () => {
+    const blogsAtEnd = await helper.blogsInDb();
+
+    const authors = blogsAtEnd.map((r) => r.author);
     expect(authors).toContain('Valve Corporation');
   });
 });
@@ -92,8 +81,8 @@ describe('when blogs not complete', () => {
       .send(newBlogNolikes)
       .expect(201)
       .expect('Content-Type', /application\/json/);
-    const res = await api.get('/api/blogs');
-    const createdBlog = res.body.find(
+    const blogsStart = await helper.blogsInDb();
+    const createdBlog = blogsStart.find(
       (blog) => blog.title === newBlogNolikes.title
     );
 
@@ -113,7 +102,40 @@ describe('when blogs not complete', () => {
       });
   });
 });
+describe('one blog can be deleted', () => {
+  test('succeeds with status code 204 if id is valid', async () => {
+    const blogStart = await helper.blogsInDb();
+    const blogToDelete = blogStart[0];
 
+    await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204);
+
+    const blogsAtEnd = await helper.blogsInDb();
+
+    expect(blogsAtEnd).toHaveLength(helper.initialBlog.length - 1);
+
+    const titles = blogsAtEnd.map((r) => r.title);
+
+    expect(titles).not.toContain(blogToDelete.title);
+  });
+});
+describe('succedes with a blog exist and can be udapted (status 200)', () => {
+  test('likes one blog can be udapted', async () => {
+    const blogStart = await helper.blogsInDb();
+    const blogtoUpdateById = blogStart[0];
+    const newLikes = 85;
+    await api
+      .put(`/api/blogs/${blogtoUpdateById.id}`)
+      .send({ likes: newLikes })
+      .expect(200);
+
+    const updatedBlogResponse = await api.get(
+      `/api/blogs/${blogtoUpdateById.id}`
+    );
+    const updatedBlog = updatedBlogResponse.body;
+
+    expect(updatedBlog.likes).toBe(newLikes);
+  });
+});
 afterAll(() => {
   mongoose.connection.close();
 });
