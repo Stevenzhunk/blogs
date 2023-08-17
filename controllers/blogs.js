@@ -1,21 +1,24 @@
 const blogRouter = require('express').Router();
 const Blog = require('../models/blogs.js');
 
-blogRouter.get('/', (req, res) => {
-  res.send('My Blog APP');
-});
-blogRouter.get('/api/blogs', (req, res) => {
-  Blog.find({}).then((blogs) => {
-    res.json(blogs);
-  });
+blogRouter.get('/api/blogs', async (req, res) => {
+  const blogs = await Blog.find({});
+  res.json(blogs);
 });
 
-blogRouter.post('/api/blogs', (req, res) => {
-  const blog = new Blog(req.body);
-
-  blog.save().then((result) => {
-    res.status(201).json(result);
+blogRouter.post('/api/blogs', async (req, res) => {
+  const body = req.body;
+  if (!body.title || !body.url) {
+    return res.status(400).json({ error: 'Title and URL are required' });
+  }
+  const blog = new Blog({
+    title: body.title,
+    author: body.author,
+    url: body.url,
+    likes: body.likes || 0,
   });
+  const result = blog.save();
+  res.status(201).json(result);
 });
 
 module.exports = blogRouter;

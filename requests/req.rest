@@ -17,7 +17,6 @@ POST http://localhost:3003/api/blogs HTTP/1.1
 Content-Type: application/json
 
 {
-  "title": "Dead Space",
   "author": "EA games",
   "url": "www.deadspace.com",
   "likes": 7788956
