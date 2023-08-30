@@ -43,13 +43,21 @@ describe('when blogs are created', () => {
 });
 describe('then blogs can be', () => {
   test('a new blog can be added', async () => {
+    //first get a one user and his id (first this case) in data base because data base user always get deleted
+    const testUsers = await helper.usersInDb();
+    const testUser = testUsers[0];
+    console.log(testUser); //first user getted
     const newBlog = {
-      title: 'Test',
-      author: 'testing Local',
+      title: 'Testing',
+      author: 'testingLocal',
       url: 'www.localpost.com',
       likes: 8888888,
-      userId: '64eea406fe72984c81945a0a',
+      userId: testUser.id, // Used ID de testUser
     };
+
+    console.log('Sending New Blog test:', newBlog);
+    const usersTest = await helper.usersInDb();
+    console.log('users in test', usersTest);
 
     await api
       .post('/api/blogs')
@@ -61,7 +69,7 @@ describe('then blogs can be', () => {
     expect(blogsAtEnd).toHaveLength(helper.initialBlog.length + 1);
 
     const titles = blogsAtEnd.map((r) => r.title);
-    expect(titles).toContain('Test');
+    expect(titles).toContain('Testing');
   });
 
   test('a specific blog is within the returned blogs', async () => {
@@ -73,11 +81,14 @@ describe('then blogs can be', () => {
 });
 describe('when blogs not complete', () => {
   test('blog without likes defaults to 0', async () => {
+    const testUsers = await helper.usersInDb();
+    const testUser = testUsers[0];
+    console.log(testUser);
     const newBlogNolikes = {
       title: 'Test',
       author: 'testing Local',
       url: 'www.localpost.com',
-      userId: '64eea406fe72984c81945a0a',
+      userId: testUser.id,
     };
 
     await api

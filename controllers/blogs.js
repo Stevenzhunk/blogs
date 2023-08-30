@@ -24,22 +24,36 @@ blogRouter.get('/api/blogs/:id', async (req, res) => {
 });
 
 blogRouter.post('/api/blogs', async (req, res) => {
-  const body = req.body;
-  if (!body.title || !body.url) {
-    return res.status(400).json({ error: 'Title and URL are required' });
+  try {
+    const body = req.body;
+    console.log('New Blog Data:', body);
+    if (!body.title || !body.url) {
+      return res.status(400).json({ error: 'Title and URL are required' });
+    }
+    console.log('Blog received by controller', body.userId);
+    const usersController = await User.find({});
+    console.log('users in controller', usersController);
+    const findedUser = await User.findById(body.userId);
+    if (!findedUser) {
+      return res.status(400).json({ error: 'Invalid user ID' });
+    }
+    console.log(findedUser);
+    const blog = new Blog({
+      title: body.title,
+      author: body.author,
+      url: body.url,
+      likes: body.likes || 0,
+      user: findedUser._id,
+    });
+    const savedBlog = await blog.save();
+    findedUser.blogs = findedUser.blogs.concat(savedBlog._id);
+    console.log(findedUser.blogs);
+    await findedUser.save();
+    res.status(201).json(savedBlog);
+  } catch (error) {
+    console.error('Error in post request:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
-  const user = await User.findById(body.userId);
-  const blog = new Blog({
-    title: body.title,
-    author: body.author,
-    url: body.url,
-    likes: body.likes || 0,
-    user: user._id,
-  });
-  const savedBlog = await blog.save();
-  user.blogs = user.blogs.concat(savedBlog._id);
-  await user.save();
-  res.status(201).json(savedBlog);
 });
 
 blogRouter.put('/api/blogs/:id', async (req, res) => {

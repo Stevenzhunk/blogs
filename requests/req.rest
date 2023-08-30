@@ -1,3 +1,4 @@
+//lista blogs
 GET http://localhost:3003/api/blogs
 
 
@@ -26,8 +27,8 @@ Content-Type: application/json
 GET http://localhost:3003/api/blogs/64c47d5ac8771ed399a44d1c
 
 ##############################
-
-GET http://localhost:3003/api/users
+// Lista usuarios
+GET http://localhost:3003/api/users/
 
 
 ##############################
@@ -68,5 +69,7 @@ Content-Type: application/json
   "likes": 8888888,
   "userId": "64eea406fe72984c81945a0a"
 }
-
+################################
+//consiguiendo un usuario especifico
+GET http://localhost:3003/api/users/64eea406fe72984c81945a0a
 

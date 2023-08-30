@@ -28,5 +28,18 @@ usersRouter.get('/api/users', async (request, response) => {
   });
   response.json(users);
 });
+usersRouter.get('/api/users/:id', async (req, res) => {
+  const user = await User.findById(req.params.id).populate('blogs', {
+    title: 1,
+    author: 1,
+    likes: 1,
+    url: 1,
+  });
 
+  if (user) {
+    res.json(user);
+  } else {
+    res.status(404).end();
+  }
+});
 module.exports = usersRouter;

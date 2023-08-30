@@ -7,12 +7,14 @@ const initialBlog = [
     author: 'EA games',
     url: 'www.deadspace.com',
     likes: 7788956,
+    user: '64eea4a8fe72984c81945a11',
   },
   {
     title: 'Half Life',
     author: 'Valve Corporation',
     url: 'www.steam.com',
     likes: 77889561414,
+    user: '64eea4a8fe72984c81945a11',
   },
 ];
 
