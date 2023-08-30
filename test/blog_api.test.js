@@ -46,7 +46,7 @@ describe('then blogs can be', () => {
     //first get a one user and his id (first this case) in data base because data base user always get deleted
     const testUsers = await helper.usersInDb();
     const testUser = testUsers[0];
-    console.log(testUser); //first user getted
+    //console.log(testUser); //first user getted
     const newBlog = {
       title: 'Testing',
       author: 'testingLocal',
@@ -55,10 +55,7 @@ describe('then blogs can be', () => {
       userId: testUser.id, // Used ID de testUser
     };
 
-    console.log('Sending New Blog test:', newBlog);
-    const usersTest = await helper.usersInDb();
-    console.log('users in test', usersTest);
-
+    //console.log('Sending New Blog test:', newBlog);
     await api
       .post('/api/blogs')
       .send(newBlog)
@@ -83,7 +80,7 @@ describe('when blogs not complete', () => {
   test('blog without likes defaults to 0', async () => {
     const testUsers = await helper.usersInDb();
     const testUser = testUsers[0];
-    console.log(testUser);
+    //console.log(testUser);
     const newBlogNolikes = {
       title: 'Test',
       author: 'testing Local',
