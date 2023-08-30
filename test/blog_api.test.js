@@ -42,12 +42,13 @@ describe('when blogs are created', () => {
   });
 });
 describe('then blogs can be', () => {
-  test('one blog can be added', async () => {
+  test('a new blog can be added', async () => {
     const newBlog = {
-      title: 'test async',
-      author: 'local',
-      url: 'www.example.com',
-      likes: 200,
+      title: 'Test',
+      author: 'testing Local',
+      url: 'www.localpost.com',
+      likes: 8888888,
+      userId: '64eea406fe72984c81945a0a',
     };
 
     await api
@@ -56,11 +57,11 @@ describe('then blogs can be', () => {
       .expect(201)
       .expect('Content-Type', /application\/json/);
 
-    const blogsAtEnd = await helper.blogsInDb(); // Corrección: Llama a blogsInDb como función
+    const blogsAtEnd = await helper.blogsInDb();
     expect(blogsAtEnd).toHaveLength(helper.initialBlog.length + 1);
 
     const titles = blogsAtEnd.map((r) => r.title);
-    expect(titles).toContain('test async');
+    expect(titles).toContain('Test');
   });
 
   test('a specific blog is within the returned blogs', async () => {
@@ -73,9 +74,10 @@ describe('then blogs can be', () => {
 describe('when blogs not complete', () => {
   test('blog without likes defaults to 0', async () => {
     const newBlogNolikes = {
-      title: 'test async',
-      author: 'local',
-      url: 'www.example.com',
+      title: 'Test',
+      author: 'testing Local',
+      url: 'www.localpost.com',
+      userId: '64eea406fe72984c81945a0a',
     };
 
     await api
@@ -143,7 +145,7 @@ describe('when there is initially one user in db', () => {
     await User.deleteMany({});
 
     const passwordHash = await bcrypt.hash('sekret', 10);
-    const user = new User({ username: 'root', passwordHash });
+    const user = new User({ username: 'root', passwordHash, name: 'root' });
 
     await user.save();
   });
