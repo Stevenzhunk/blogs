@@ -10,6 +10,7 @@ const logger = require('./utils/logger');
 const blogRouter = require('./controllers/blogs.js');
 const middleware = require('./utils/middleware');
 const usersRouter = require('./controllers/users');
+const loginRouter = require('./controllers/login');
 
 morgan.token('type', (req) => {
   if (req.method !== 'POST') {
@@ -33,6 +34,7 @@ app.use(cors());
 app.use(express.json());
 app.use('/', blogRouter);
 app.use('/', usersRouter);
+app.use('/', loginRouter);
 app.use(middleware.unknownEndpoint);
 app.use(middleware.errorHandler);
 
