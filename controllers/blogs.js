@@ -1,6 +1,7 @@
 const blogRouter = require('express').Router();
 const Blog = require('../models/blogs');
 const User = require('../models/users');
+const jwt = require('jsonwebtoken');
 
 blogRouter.get('/api/blogs', async (req, res) => {
   const blogs = await Blog.find({}).populate('user', {
@@ -26,6 +27,7 @@ blogRouter.get('/api/blogs/:id', async (req, res) => {
 blogRouter.post('/api/blogs', async (req, res) => {
   try {
     const body = req.body;
+
     //console.log('New Blog Data:', body);
     if (!body.title || !body.url) {
       return res.status(400).json({ error: 'Title and URL are required' });
@@ -33,17 +35,23 @@ blogRouter.post('/api/blogs', async (req, res) => {
     //console.log('Blog received by controller', body.userId);
     //const usersController = await User.find({});
     //console.log('users in controller', usersController);
-    const findedUser = await User.findById(body.userId);
+    const decodedToken = jwt.verify(req.token, process.env.SECRET);
+    if (!req.token || !decodedToken.id) {
+      return res.status(401).json({ error: 'token missing or invalid' });
+    }
+    const user = await User.findById(decodedToken.id);
+    const findedUser = await User.findById(decodedToken.id);
     if (!findedUser) {
       return res.status(400).json({ error: 'Invalid user ID' });
     }
     //console.log(findedUser);
+
     const blog = new Blog({
       title: body.title,
       author: body.author,
       url: body.url,
       likes: body.likes || 0,
-      user: findedUser._id,
+      user: user._id,
     });
     const savedBlog = await blog.save();
     findedUser.blogs = findedUser.blogs.concat(savedBlog._id);

@@ -82,3 +82,18 @@ Content-Type: application/json
   "username":"Remplex",
   "password":"123456"
 }
+
+################################
+//post with user Stevenz
+//token -> beared eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlJlbXBsZXgiLCJpZCI6IjY0ZWVhNGE4ZmU3Mjk4NGM4MTk0NWExMSIsImlhdCI6MTY5MzYyMDg2NH0.DcgD2XvDOnLpLaYjGddYv_Qr0VZwIj7sZzECNfH9HHg
+POST http://localhost:3003/api/blogs
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlJlbXBsZXgiLCJpZCI6IjY0ZWVhNGE4ZmU3Mjk4NGM4MTk0NWExMSIsImlhdCI6MTY5MzYyNDE1MCwiZXhwIjoxNjkzNjI3NzUwfQ.CoFjg5UUhT8mZ6T-UWk8UiFU_DdbPC2_er1yvf1JKAA
+
+{
+  "title": "im Test with login remplex and middleware",
+  "author": "testing Local",
+  "url": "www.localpost.com",
+  "likes": 22222222222,
+  "userId": "64eea4a8fe72984c81945a11"
+}
