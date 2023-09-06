@@ -43,21 +43,30 @@ describe('when blogs are created', () => {
 });
 describe('then blogs can be', () => {
   test('a new blog can be added', async () => {
-    //first get a one user and his id (first this case) in data base because data base user always get deleted
     const testUsers = await helper.usersInDb();
     const testUser = testUsers[0];
-    //console.log(testUser); //first user getted
+    const userToLogin = {
+      username: testUser.username,
+      password: 'sekret',
+    };
+    const loginResponse = await api
+      .post('/api/login')
+      .send(userToLogin)
+      .expect(200)
+      .expect('Content-Type', /application\/json/);
+
+    const token = loginResponse.body.token;
+
     const newBlog = {
       title: 'Testing',
       author: 'testingLocal',
       url: 'www.localpost.com',
       likes: 8888888,
-      userId: testUser.id, // Used ID de testUser
     };
 
-    //console.log('Sending New Blog test:', newBlog);
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/);
@@ -80,7 +89,18 @@ describe('when blogs not complete', () => {
   test('blog without likes defaults to 0', async () => {
     const testUsers = await helper.usersInDb();
     const testUser = testUsers[0];
-    //console.log(testUser);
+    const userToLogin = {
+      username: testUser.username,
+      password: 'sekret',
+    };
+    const loginResponse = await api
+      .post('/api/login')
+      .send(userToLogin)
+      .expect(200)
+      .expect('Content-Type', /application\/json/);
+
+    const token = loginResponse.body.token;
+
     const newBlogNolikes = {
       title: 'Test',
       author: 'testing Local',
@@ -90,6 +110,7 @@ describe('when blogs not complete', () => {
 
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlogNolikes)
       .expect(201)
       .expect('Content-Type', /application\/json/);
@@ -116,14 +137,49 @@ describe('when blogs not complete', () => {
 });
 describe('one blog can be deleted', () => {
   test('succeeds with status code 204 if id is valid', async () => {
+    const testUsers = await helper.usersInDb();
+    const testUser = testUsers[0];
+    const userToLogin = {
+      username: testUser.username,
+      password: 'sekret',
+    };
+
+    const loginResponse = await api
+      .post('/api/login')
+      .send(userToLogin)
+      .expect(200)
+      .expect('Content-Type', /application\/json/);
+
+    const token = loginResponse.body.token;
+    const blogTest = {
+      title: 'Test',
+      author: 'testing Local',
+      url: 'www.localpost.com',
+      userId: testUser.id,
+    };
+
+    await api
+      .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
+      .send(blogTest)
+      .expect(201)
+      .expect('Content-Type', /application\/json/);
+
     const blogStart = await helper.blogsInDb();
-    const blogToDelete = blogStart[0];
+    console.log('blog initial with new created', blogStart);
+    const blogToDelete = blogStart[2];
+    console.log('blog to delete', blogToDelete);
 
-    await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204);
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(204);
 
+    // check blog inicial
     const blogsAtEnd = await helper.blogsInDb();
+    console.log('blogfinal', blogsAtEnd);
 
-    expect(blogsAtEnd).toHaveLength(helper.initialBlog.length - 1);
+    expect(blogsAtEnd).toHaveLength(helper.initialBlog.length);
 
     const titles = blogsAtEnd.map((r) => r.title);
 

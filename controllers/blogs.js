@@ -1,7 +1,5 @@
 const blogRouter = require('express').Router();
 const Blog = require('../models/blogs');
-const User = require('../models/users');
-const jwt = require('jsonwebtoken');
 
 blogRouter.get('/api/blogs', async (req, res) => {
   const blogs = await Blog.find({}).populate('user', {
@@ -27,6 +25,7 @@ blogRouter.get('/api/blogs/:id', async (req, res) => {
 blogRouter.post('/api/blogs', async (req, res) => {
   try {
     const body = req.body;
+    const user = req.user;
 
     //console.log('New Blog Data:', body);
     if (!body.title || !body.url) {
@@ -35,15 +34,16 @@ blogRouter.post('/api/blogs', async (req, res) => {
     //console.log('Blog received by controller', body.userId);
     //const usersController = await User.find({});
     //console.log('users in controller', usersController);
-    const decodedToken = jwt.verify(req.token, process.env.SECRET);
-    if (!req.token || !decodedToken.id) {
+    //const decodedToken = jwt.verify(req.token, process.env.SECRET);
+
+    if (!req.token) {
       return res.status(401).json({ error: 'token missing or invalid' });
     }
-    const user = await User.findById(decodedToken.id);
-    const findedUser = await User.findById(decodedToken.id);
-    if (!findedUser) {
-      return res.status(400).json({ error: 'Invalid user ID' });
-    }
+    //const user = await User.findById(decodedToken.id);
+    //const findedUser = await User.findById(decodedToken.id);
+    //if (!findedUser) {
+    //return res.status(400).json({ error: 'Invalid user ID' });
+    //}
     //console.log(findedUser);
 
     const blog = new Blog({
@@ -54,9 +54,9 @@ blogRouter.post('/api/blogs', async (req, res) => {
       user: user._id,
     });
     const savedBlog = await blog.save();
-    findedUser.blogs = findedUser.blogs.concat(savedBlog._id);
+    //findedUser.blogs = findedUser.blogs.concat(savedBlog._id);
     //console.log(findedUser.blogs);
-    await findedUser.save();
+    //await findedUser.save();
     res.status(201).json(savedBlog);
   } catch (error) {
     console.error('Error in post request:', error);
@@ -78,8 +78,26 @@ blogRouter.put('/api/blogs/:id', async (req, res) => {
 });
 
 blogRouter.delete('/api/blogs/:id', async (req, res) => {
-  await Blog.findByIdAndRemove(req.params.id);
-  res.status(204).end();
+  const user = req.user;
+  try {
+    const blog = await Blog.findById(req.params.id);
+
+    if (!blog) {
+      return res.status(404).json({ error: 'Blog not found' });
+    }
+
+    if (blog.user.toString() !== user.id) {
+      return res
+        .status(403)
+        .json({ error: 'You do not have permission to delete' });
+    }
+
+    await Blog.findByIdAndRemove(req.params.id);
+    res.status(204).end();
+  } catch (error) {
+    console.error('Error in delete request:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
 module.exports = blogRouter;

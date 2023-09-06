@@ -33,7 +33,7 @@ mongoose
 app.use(cors());
 app.use(express.json());
 app.use(middleware.tokenExtractor);
-app.use('/', blogRouter);
+app.use('/', middleware.userExtractor, blogRouter);
 app.use('/', usersRouter);
 app.use('/', loginRouter);
 app.use(middleware.unknownEndpoint);
