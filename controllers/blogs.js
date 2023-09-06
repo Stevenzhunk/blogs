@@ -37,7 +37,9 @@ blogRouter.post('/api/blogs', async (req, res) => {
     //const decodedToken = jwt.verify(req.token, process.env.SECRET);
 
     if (!req.token) {
-      return res.status(401).json({ error: 'token missing or invalid' });
+      return res
+        .status(401)
+        .json({ error: 'token missing or invalid (Unauthorized)' });
     }
     //const user = await User.findById(decodedToken.id);
     //const findedUser = await User.findById(decodedToken.id);
@@ -79,6 +81,11 @@ blogRouter.put('/api/blogs/:id', async (req, res) => {
 
 blogRouter.delete('/api/blogs/:id', async (req, res) => {
   const user = req.user;
+  if (!req.token) {
+    return res
+      .status(401)
+      .json({ error: 'token missing or invalid (Unauthorized)' });
+  }
   try {
     const blog = await Blog.findById(req.params.id);
 
